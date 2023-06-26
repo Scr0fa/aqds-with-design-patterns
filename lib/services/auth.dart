@@ -5,7 +5,9 @@ import '../models/user.dart';
 import 'dio.dart';
 
 class Auth with ChangeNotifier {
+  static Auth? _instance;
   static Dio _dio = Dio();
+
   bool _isLoggedIn = false;
   late User _user = User(name: '', email: '', avatar: '');
   late String _token = '';
@@ -13,8 +15,16 @@ class Auth with ChangeNotifier {
   bool get authenticated => _isLoggedIn;
   User get user => _user;
 
-
   final storage = FlutterSecureStorage();
+
+  Auth._();
+
+  static Auth getInstance() {
+    if (_instance == null) {
+      _instance = Auth._();
+    }
+    return _instance!;
+  }
 
   Dio createDioInstance() {
     // Create and configure Dio instance
@@ -66,8 +76,7 @@ class Auth with ChangeNotifier {
 
   Future<List<dynamic>> fetchPM() async {
     try {
-      final response =
-      await dio().get('/pm'); // Update the URL with the correct base address
+      final response = await dio().get('/pm'); // Update the URL with the correct base address
 
       if (response.statusCode == 200) {
         final responseData = response.data;
@@ -82,14 +91,15 @@ class Auth with ChangeNotifier {
     return []; // Return an empty list if there was an error
   }
 
-
   Future<void> tryToken({String? token}) async {
     if (token == null) {
       return;
     } else {
       try {
-        final response = await dio().get('/user',
-            options: Options(headers: {'Authorization': 'Bearer $token'}));
+        final response = await dio().get(
+          '/user',
+          options: Options(headers: {'Authorization': 'Bearer $token'}),
+        );
         if (response.data is Map<String, dynamic>) {
           _isLoggedIn = true;
           _user = User.fromJson(response.data);
@@ -112,8 +122,10 @@ class Auth with ChangeNotifier {
 
   Future<void> logout() async {
     try {
-      final response = await dio().get('/user/revoke',
-          options: Options(headers: {'Authorization': 'Bearer $_token'}));
+      final response = await dio().get(
+        '/user/revoke',
+        options: Options(headers: {'Authorization': 'Bearer $_token'}),
+      );
 
       cleanUp();
       notifyListeners();

@@ -8,7 +8,7 @@ void main() {
   runApp(
     MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (context) => Auth()),
+        ChangeNotifierProvider(create: (context) => Auth.getInstance()),
       ],
       child: MyApp(),
     ),
