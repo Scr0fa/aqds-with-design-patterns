@@ -3,9 +3,8 @@ import 'package:flutter_laravel/services/auth.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:provider/provider.dart';
 
-import 'drawer.dart'; // Import the CustomDrawer widget
+import 'drawer.dart';
 
-// Factory class responsible for creating instances of MyAccount
 class MyAccountFactory {
   static MyAccount createMyAccount() {
     return MyAccount();
