@@ -5,33 +5,33 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:provider/provider.dart';
 
 import 'drawer.dart';
+import 'locations_screen.dart';
 
-// Create a prototype class for the Dashboard widget
-class DashboardPrototype {
-  bool isLoading = true;
-  List<dynamic> pmData = [];
-  List<String> timestamps = [];
+class Prototype {
+  List<dynamic> locations;
+
+  Prototype({
+    required this.locations,
+  });
+
+  Prototype clone() => Prototype(locations: locations);
 }
 
 class Dashboard extends StatefulWidget {
-  final DashboardPrototype prototype;  // Add a prototype parameter to the constructor
-
-  const Dashboard({required this.prototype, Key? key}) : super(key: key);
-
   @override
   _DashboardState createState() => _DashboardState();
 }
 
 class _DashboardState extends State<Dashboard> {
   final storage = FlutterSecureStorage();
+  late bool isLoading = true;
 
-  // Clone the prototype object in the initState method
+  late List<dynamic> pmData = [];
+  late List<String> timestamps = [];
+
   @override
   void initState() {
     super.initState();
-    widget.prototype.isLoading = true;
-    widget.prototype.pmData = [];
-    widget.prototype.timestamps = [];
     readToken();
     fetchPMData();
   }
@@ -44,7 +44,7 @@ class _DashboardState extends State<Dashboard> {
 
   Future<void> fetchPMData() async {
     setState(() {
-      widget.prototype.isLoading = true;
+      isLoading = true;
     });
 
     try {
@@ -63,15 +63,15 @@ class _DashboardState extends State<Dashboard> {
         }
       });
       setState(() {
-        widget.prototype.pmData = data;
-        widget.prototype.timestamps = extractedTimestamps;
-        widget.prototype.isLoading = false;
+        pmData = data;
+        timestamps = extractedTimestamps;
+        isLoading = false;
       });
     } catch (error) {
       // Handle error, such as displaying an error message
       print('Error: $error');
       setState(() {
-        widget.prototype.isLoading = false;
+        isLoading = false;
       });
     }
   }
@@ -93,23 +93,41 @@ class _DashboardState extends State<Dashboard> {
   }
 
   String getLocation(int index) {
-    return widget.prototype.pmData[index]['location'] ?? '';
+    return pmData[index]['location'] ?? '';
   }
 
   double getPM1(int index) {
-    return widget.prototype.pmData[index]['pm1'] ?? 0.0;
+    return pmData[index]['pm1'] ?? 0.0;
   }
 
   double getPM25(int index) {
-    return widget.prototype.pmData[index]['pm2.5'] ?? 0.0;
+    return pmData[index]['pm2.5'] ?? 0.0;
   }
 
   double getPM10(int index) {
-    return widget.prototype.pmData[index]['pm10'] ?? 0.0;
+    return pmData[index]['pm10'] ?? 0.0;
   }
 
   String getRemarks(int index) {
-    return widget.prototype.pmData[index]['remarks'] ?? '';
+    return pmData[index]['remarks'] ?? '';
+  }
+
+  Prototype clone() {
+    List<dynamic> uLocations = [];
+    for (int i = 0; i < pmData.length; i++) {
+      String location = pmData[i]["location"];
+      bool isLocationExists = false;
+      for (int j = 0; j < uLocations.length; j++) {
+        if (uLocations[j]["location"] == location) {
+          isLocationExists = true;
+          break;
+        }
+      }
+      if (!isLocationExists) {
+        uLocations.add({"location": location});
+      }
+    }
+    return Prototype(locations: uLocations);
   }
 
   @override
@@ -120,12 +138,12 @@ class _DashboardState extends State<Dashboard> {
         backgroundColor: Colors.blue.shade700,
       ),
       body: Center(
-        child: widget.prototype.isLoading
+        child: isLoading
             ? CircularProgressIndicator()
             : ListView.builder(
-          itemCount: widget.prototype.timestamps.length,
+          itemCount: timestamps.length,
           itemBuilder: (BuildContext context, int index) {
-            String timestamp = widget.prototype.timestamps[index];
+            String timestamp = timestamps[index];
             String formattedTimestamp = formatTimestamp(timestamp);
 
             return Card(
@@ -188,6 +206,18 @@ class _DashboardState extends State<Dashboard> {
         ),
       ),
       drawer: CustomDrawer(),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (context) => Locations(prototype: clone())
+            ),
+          );
+        },
+        child: const Icon(Icons.location_pin),
+      ),
     );
   }
 }
+

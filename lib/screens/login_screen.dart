@@ -30,7 +30,7 @@ class LoginController {
       try {
         await Provider.of<Auth>(context, listen: false).login(creds: creds);
         Navigator.of(context).push(
-          MaterialPageRoute(builder: (context) => Dashboard(prototype: DashboardPrototype())),
+          MaterialPageRoute(builder: (context) => Dashboard()),
         );
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -142,7 +142,7 @@ class _LoginPageState extends State<LoginPage> {
                           },
                         );
                         Navigator.of(context).push(
-                          MaterialPageRoute(builder: (context) => Dashboard(prototype: DashboardPrototype())),
+                          MaterialPageRoute(builder: (context) => Dashboard()),
                         );
                       } catch (e) {
                         ScaffoldMessenger.of(context).showSnackBar(
